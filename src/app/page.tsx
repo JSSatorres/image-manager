@@ -1,11 +1,10 @@
 import Image from 'next/image'
+import { ProductForm } from '@/app/components/ProductForm'
 
 export default function Home() {
   return (
     <>
-      <h1>olii</h1>
-      <li>a</li>
-      <li>b</li>
+      <ProductForm />
     </>
   )
 }
