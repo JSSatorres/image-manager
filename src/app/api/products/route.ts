@@ -48,8 +48,7 @@ export async function POST(request:Request): Promise<NextResponse> {
     const result = await conDB.query<DatabaseProduct[]>("INSERT INTO product SET ?", {
       name,
       description,
-      price,
-
+      price
     });
 
     return NextResponse.json({ name, description, price });
