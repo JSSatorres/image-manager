@@ -1,86 +1,61 @@
 import {NextResponse} from 'next/server'
 import {conDB} from '@/libs/mysql'
 
-export async function GET() {
-  
-  try {
+interface DatabaseProduct {
+  idProduct: number;
+  Name: string;
+  createdAt: string;
+  description: string;
+  price: number;
+}
 
-    const result:any = await conDB.query("SELECT NOW()");
-    console.log(result)
-    return NextResponse.json({ message: result[0]["now()"] });
-  } catch (error) {
-    // Manejar el error de manera adecuada
-    console.error('Error al consultar la base de datos:', error);
-    return NextResponse.json({ error: 'Ocurrió un error al consultar la base de datos' }, { status: 500 });
+// interface RequestBody {
+//   name: string;
+//   description: string;
+//   price: number;
+//   id:string
+// }
+
+export async function GET(): Promise<NextResponse> {
+  try {
+    const results = await conDB.query<DatabaseProduct[]>("SELECT * FROM product");
+    return NextResponse.json(results);
+  } catch (error ) {
+    if (error instanceof Error) {
+      return NextResponse.json(
+        { message: error.message },
+        {
+          status: 500,
+        }
+      );
+    }else {
+      return NextResponse.json(
+        { message: "An unknown error occurred" },
+        {
+          status: 500,
+        }
+      );
+    }   
   }
 }
 
-export async function POST(request: Request) {
+
+export async function POST(request:Request): Promise<NextResponse> {
   try {
-    const data = await request.json();
-    // const data = await request.formData();
-    // const image = data.get("image");
+    const { name, description, price } = await request.json();
+    console.log(name, description, price);
 
-    // if (!data.get("name")) {
-    //   return NextResponse.json(
-    //     {
-    //       message: "Name is required",
-    //     },
-    //     {
-    //       status: 400,
-    //     }
-    //   );
-    // }
+    const result = await conDB.query<DatabaseProduct[]>("INSERT INTO product SET ?", {
+      name,
+      description,
+      price,
 
-    // if (!image) {
-    //   return NextResponse.json(
-    //     {
-    //       message: "Image is required",
-    //     },
-    //     {
-    //       status: 400,
-    //     }
-    //   );
-    // }
+    });
 
-    // const buffer = await processImage(image);
-
-    // const res = await new Promise((resolve, reject) => {
-    //   cloudinary.uploader
-    //     .upload_stream(
-    //       {
-    //         resource_type: "image",
-    //       },
-    //       async (err, result) => {
-    //         if (err) {
-    //           console.log(err);
-    //           reject(err);
-    //         }
-
-    //         resolve(result);
-    //       }
-    //     )
-    //     .end(buffer);
-    // });
-
-    // const result = await conn.query("INSERT INTO product SET ?", {
-    //   name: data.get("name"),
-    //   description: data.get("description"),
-    //   price: data.get("price"),
-    //   image: res.secure_url,
-    // });
-
-    // return NextResponse.json({
-    //   name: data.get("name"),
-    //   description: data.get("description"),
-    //   price: data.get("price"),
-    //   id: result.insertId,
-    // });
+    return NextResponse.json({ name, description, price });
   } catch (error: any) {
     return NextResponse.json(
-      {
-        message: error.message,
-      },
+      { message: error.message },
       {
         status: 500,
       }
